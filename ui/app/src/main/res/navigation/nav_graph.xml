@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_login"
+    app:startDestination="@id/setRegisterMethodFragment">
+
+    <fragment
+        android:id="@+id/setRegisterMethodFragment"
+        android:name="com.example.fuel.ui.fragment.SetRegisterMethodFragment"
+        android:label="Register method"
+        tools:layout="@layout/fragment_set_register_method" >
+        <action
+            android:id="@+id/action_setRegisterMethodFragment_to_setUsernameFragment"
+            app:destination="@id/setUsernameFragment" />
+        <action
+            android:id="@+id/action_setRegisterMethodFragment_to_mapFragment"
+            app:destination="@id/mapFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/setUsernameFragment"
+        android:name="com.example.fuel.ui.fragment.SetUsernameFragment"
+        android:label="Username"
+        tools:layout="@layout/fragment_set_username" >
+        <action
+            android:id="@+id/action_setUsernameFragment_to_setPasswordFragment"
+            app:destination="@id/setPasswordFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/setPasswordFragment"
+        android:name="com.example.fuel.ui.fragment.SetPasswordFragment"
+        android:label="Password"
+        tools:layout="@layout/fragment_set_password" >
+        <action
+            android:id="@+id/action_setPasswordFragment_to_blankFragment"
+            app:destination="@id/blankFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/blankFragment"
+        android:name="com.example.fuel.ui.fragment.BlankFragment"
+        android:label="BlankFragment" />
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.example.fuel.ui.fragment.map.MapFragment"
+        android:label="Fuel stations"
+        tools:layout="@layout/fragment_map" >
+        <action
+            android:id="@+id/action_mapFragment_to_mapFilter3"
+            app:destination="@id/mapFilter" />
+    </fragment>
+    <fragment
+        android:id="@+id/mapFilter"
+        android:name="com.example.fuel.ui.fragment.map.MapFilter"
+        android:label="MapFilter" />
+
+</navigation>
