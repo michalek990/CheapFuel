@@ -55,7 +55,31 @@ object RetrofitInstance {
         retrofit.create(ReviewApiService::class.java)
     }
 
-    val testApi: TestApiService by lazy {
-        retrofit.create(TestApiService::class.java)
+    val favouriteApiService: FavouriteApiService by lazy {
+        retrofit.create(FavouriteApiService::class.java)
+    }
+
+    val fuelPriceApiService: FuelPriceApiService by lazy {
+        retrofit.create(FuelPriceApiService::class.java)
+    }
+
+    val fuelAtStationApiService: FuelAtStationApiService by lazy {
+        retrofit.create(FuelAtStationApiService::class.java)
+    }
+
+    val serviceAtStationService: ServiceAtStationApiService by lazy {
+        retrofit.create(ServiceAtStationApiService::class.java)
+    }
+
+    val userApiService: UserApiService by lazy {
+        retrofit.create(UserApiService::class.java)
+    }
+
+    val reportApiService: ReportApiService by lazy {
+        retrofit.create(ReportApiService::class.java)
+    }
+
+    val blockUserApiService: BlockUserApiService by lazy {
+        retrofit.create(BlockUserApiService::class.java)
     }
 }

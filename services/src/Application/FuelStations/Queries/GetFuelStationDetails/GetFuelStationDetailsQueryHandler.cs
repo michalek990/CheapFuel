@@ -24,7 +24,7 @@ public sealed class GetFuelStationDetailsQueryHandler : IRequestHandler<GetFuelS
 
     public async Task<FuelStationDetailsDto> Handle(GetFuelStationDetailsQuery request, CancellationToken cancellationToken)
     {
-        var fuelStation = await _fuelStationRepository.GetFuelStationWithAllDetails(request.Id.OrElseThrow())
+        var fuelStation = await _fuelStationRepository.GetFuelStationWithAllDetailsAsync(request.Id.OrElseThrow())
                           ?? throw new NotFoundException($"Fuel station not found for id = {request.Id}");
 
         var fuelPrices = FetchMostRecentFuelPrices(fuelStation);
@@ -71,7 +71,8 @@ public sealed class GetFuelStationDetailsQueryHandler : IRequestHandler<GetFuelS
             StationChain = _mapper.Map<StationChainDto>(fuelStation.StationChain),
             OpeningClosingTimes = _mapper.Map<IEnumerable<OpeningClosingTimeDto>>(fuelStation.OpeningClosingTimes),
             Services = _mapper.Map<IEnumerable<FuelStationServiceDto>>(services),
-            FuelTypes = fuelTypesWithPrice
+            FuelTypes = fuelTypesWithPrice,
+            Owners = fuelStation.OwnedStations.Select(os => os.User!.Username)!
         };
     }
 }
