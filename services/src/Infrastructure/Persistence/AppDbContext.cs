@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence;
 
-public sealed class AppDbContext : DbContext
+public abstract class AppDbContext : DbContext
 {
     private readonly BeforeSaveChangesPipeline _beforeSaveChangesPipeline;
     
@@ -15,6 +15,7 @@ public sealed class AppDbContext : DbContext
     public DbSet<StationChain> StationChains => Set<StationChain>();
     public DbSet<User> Users => Set<User>();
     public DbSet<FuelStation> FuelStations => Set<FuelStation>();
+    public DbSet<OpeningClosingTime> OpeningClosingTimes => Set<OpeningClosingTime>();
     public DbSet<Favorite> Favorites => Set<Favorite>();
     public DbSet<FuelAtStation> FuelAtStations => Set<FuelAtStation>();
     public DbSet<ServiceAtStation> ServiceAtStations => Set<ServiceAtStation>();
@@ -23,9 +24,10 @@ public sealed class AppDbContext : DbContext
     public DbSet<FuelPrice> FuelPrices => Set<FuelPrice>();
     public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+    public DbSet<ReportedReview> ReportedReviews => Set<ReportedReview>();
+    public DbSet<BlockedUser> BlockedUsers => Set<BlockedUser>();
 
-    public AppDbContext(DbContextOptions<AppDbContext> options, IBeforeSaveChangesPipelineBuilder builder) 
-        : base(options)
+    protected AppDbContext(IBeforeSaveChangesPipelineBuilder builder)
     {
         _beforeSaveChangesPipeline = builder.Build();
     }

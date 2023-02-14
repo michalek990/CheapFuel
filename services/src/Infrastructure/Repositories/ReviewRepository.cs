@@ -20,6 +20,15 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
         return await Paginate(query, pageRequest);
     }
 
+    public async Task<Page<Review>> GetAllForUserAsync(string username, PageRequest<Review> pageRequest)
+    {
+        IQueryable<Review> query = Context.Reviews
+            .Include(r => r.User)
+            .Where(r => r.User!.Username == username);
+
+        return await Paginate(query, pageRequest);
+    }
+
     public async Task<bool> ExistsByFuelStationAndUsername(long fuelStationId, string username)
     {
         return await Context.Reviews
@@ -33,5 +42,13 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
             .Include(r => r.User)
             .Where(r => r.User!.Username == username && r.FuelStationId == fuelStationId)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task RemoveAllByFuelStationId(long fuelStationId)
+    {
+        var toDelete = await Context.Reviews
+            .Where(r => r.FuelStationId == fuelStationId)
+            .ToListAsync();
+        Context.Reviews.RemoveRange(toDelete);
     }
 }

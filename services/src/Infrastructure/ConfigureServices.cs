@@ -9,6 +9,7 @@ using Infrastructure.Common.Services.Email;
 using Infrastructure.Exceptions;
 using Infrastructure.Identity;
 using Infrastructure.Identity.Policies.EmailVerifiedRequirement;
+using Infrastructure.Identity.Policies.UserNotBannedRequirement;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Pipeline;
 using Infrastructure.Persistence.Pipeline.Operations;
@@ -19,35 +20,36 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure;
 
 public static class ConfigureServices
 {
+    private const string InMemoryProvider = "InMemory";
+    private const string SqlServerProvider = "SqlServer";
+    private const string MySqlProvider = "MySql";
+    
     public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        if (configuration.GetValue<bool>("UseInMemoryDatabase"))
-        {
-            services.AddDbContext<AppDbContext>(c =>
-                c.UseInMemoryDatabase("CheapFuelDB"));
-        }
-        else
-        {
-            var connectionString = configuration.GetConnectionString("DatabaseConnection")
-                                   ?? throw new AppConfigurationException("Database connection string is missing");
-            var serverVersion = new MySqlServerVersion(new Version(8, 0, 0));
+        var provider = configuration.GetValue<string>("DbProvider");
 
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseMySql(connectionString, serverVersion)
-                    .LogTo(Console.WriteLine, LogLevel.Information)
-                    .EnableSensitiveDataLogging()
-                    .EnableDetailedErrors());
+        switch (provider)
+        {
+            case InMemoryProvider:
+                services.AddDbContext<AppDbContext, InMemoryDbContext>();
+                break;
+            case SqlServerProvider:
+                services.AddDbContext<AppDbContext, MsSqlDbContext>();
+                break;
+            case MySqlProvider:
+                services.AddDbContext<AppDbContext, MySqlDbContext>();
+                break;
+            default:
+                throw new AppConfigurationException("Invalid database provider!");
         }
     }
 
@@ -56,7 +58,6 @@ public static class ConfigureServices
         services.AddScoped<IAddCreationInfoOperation, AddCreationInfoOperation>();
         services.AddScoped<IAddUpdateInfoOperation, AddUpdateInfoOperation>();
         services.AddScoped<IRemovalHandlingOperation, RemovalHandlingOperation>();
-
         services.AddScoped<IBeforeSaveChangesPipelineBuilder, BeforeSaveChangesPipelineBuilder>();
     }
 
@@ -76,6 +77,8 @@ public static class ConfigureServices
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IEmailVerificationTokenRepository, EmailVerificationTokenRepository>();
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+        services.AddScoped<IReportedReviewRepository, ReportedReviewRepository>();
+        services.AddScoped<IBlockUserRepository, BlockUserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
 
@@ -120,10 +123,15 @@ public static class ConfigureServices
     {
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("EmailVerified", builder => builder.AddRequirements(new EmailVerifiedRequirement()));
+            options.AddPolicy("AccountActive", builder =>
+            {
+                builder.AddRequirements(new EmailVerifiedRequirement());
+                builder.AddRequirements(new UserNotBannedRequirement());
+            });
         });
         
         services.AddScoped<IAuthorizationHandler, EmailVerifiedRequirementHandler>();
+        services.AddScoped<IAuthorizationHandler, UserNotBannedRequirementHandler>();
     }
 
     public static void AddSmtpService(this IServiceCollection services, IConfiguration configuration)
